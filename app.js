@@ -44,6 +44,8 @@ const worker = async () => {
             const folderPath = path.join(process.cwd(), folderName)
             await fs.mkdir(folderPath, {recursive: true});
             await fs.writeFile(path.join(folderPath , fileNames[index]), 'hello World')
+
+            // writeFile  -  имеет оганичения 2 гигибайта
         })
         // await Promise.all(promises)    // если упадет один промис то упадут все.
         //Для избежание такого поведения можно использовать Promise.allSetled()
@@ -65,9 +67,6 @@ const worker = async () => {
             }else {
                 console.log('This is directory:', path.join(process.cwd(), file));
             }
-
-
-
         }
 
     } catch (e) {
@@ -75,6 +74,11 @@ const worker = async () => {
     }
 }
 
+(async ()=>{
+    await worker()
+    //Данный код сразу же запустит последовательно все функии внутри самовызвающейся функции.
+    //Далее сожно прописать еще какую то функции. И они будут запущенны после worker()
+})()
 
 worker()
 
