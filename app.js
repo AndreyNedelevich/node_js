@@ -43,7 +43,7 @@ const worker = async () => {
             // и запускаем при помощи promiseAll.
             const folderPath = path.join(process.cwd(), folderName)
             await fs.mkdir(folderPath, {recursive: true});
-            await fs.writeFile(path.join(folderPath, fileNames[index]), 'hello World')
+            await fs.writeFile(path.join(folderPath , fileNames[index]), 'hello World')
         })
         // await Promise.all(promises)    // если упадет один промис то упадут все.
         //Для избежание такого поведения можно использовать Promise.allSetled()
