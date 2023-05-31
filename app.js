@@ -10,7 +10,7 @@ const path = require("node:path");
 
 
 const createDir= async (path)=>{
-    return new Promise((resolve,reject)=>fs.mkdir(path,(err)=>{
+    return new Promise((resolve,reject)=>fs.mkdir(__dirname,path,(err)=>{
         if(err) return reject(err.message)
         resolve()
     }))
