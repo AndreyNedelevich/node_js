@@ -5,8 +5,8 @@ const path = require('node:path')
 const dirPath=(path.join(process.cwd(),'dataBase','data_base.json'))
 
   const readFile=  async ()=> {
-        const file = await fs.readFile(dirPath)
-        const data=data.toString();
+        const buffer = await fs.readFile(dirPath)
+        const data=buffer.toString();
         return data? JSON.parse(data):[]
     }
 
