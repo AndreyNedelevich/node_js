@@ -16,8 +16,7 @@ module.exports= class UserController {
  async getAll(req, res) {
         try {
             const users =await serviceBD.readFile();
-            const data= JSON.stringify(users)
-            return res.json(data)
+            return res.json(users)
         } catch (e) {
             res.status(500).json(e.message)
         }

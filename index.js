@@ -6,19 +6,6 @@ const fs = require('node:fs/promises')
 const path=require('node:path')
 
 
-const readFile= async ()=>{
-    const data = await fs.readFile(path.join(__dirname,'dataBase','data_base.json'))
-    const file=data.toString();
-    return  JSON.parse(file)
-
-}
-
-
-(async ()=>{
-   const res= await readFile()
-    console.log(res);
-})()
-
 
 
 const PORT = 5100;
@@ -27,7 +14,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
-app.use('/', router)
+app.use('/api', router)
 
 
 async function startApp() {
