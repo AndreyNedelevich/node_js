@@ -1,25 +1,23 @@
-const ServiceBD = require('./BD.sevice.js')
+
+const serviceBD=require('./BD.sevice.js')
 
 
-const serviceBD = new ServiceBD()
-
-console.log(serviceBD.readFile);
 
 
-module.exports =class UserController {
+
+
+module.exports= class UserController {
     // async create(user) {
     //     const fileName = fileService.saveFile(picture);
     //     const createdPost = await Post.create(user);
     //     return createdPost;
     // }
 
-  getAll(req, res) {
+ async getAll(req, res) {
         try {
-            // const users =await serviceBD.readFile()
-            // console.log(users);
-
-            const users={name:'Andrey'}
-            return  res.json(users)
+            const users =await serviceBD.readFile();
+            const data= JSON.stringify(users)
+            return res.json(data)
         } catch (e) {
             res.status(500).json(e.message)
         }

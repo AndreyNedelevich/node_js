@@ -1,17 +1,23 @@
-const fs = require('node:fs');
+
+const fs = require('node:fs/promises')
 const path = require('node:path')
-const e = require("express");
 
+const dirPath=(path.join(__dirname,'dataBase','data_base.json'))
 
-module.exports = class ServiceBD {
-    async readFile() {
-        const data = await fs.readFile(path.resolve(__dirname, 'dataBase', 'data_base.json')).toString()
+  const readFile=  async ()=> {
+        const file = await fs.readFile(dirPath)
+        const data=data.toString();
         if (!data) throw new Error('there is not data')
-        return JSON.parse(data)
+        return  JSON.parse(data)
     }
 
-    async writeFile(data) {
-        await fs.writeFile(path.resolve(__dirname, 'dataBase', 'data_base.json'), JSON.stringify(data))
+  const writeFile=  async (data) =>{
+        await fs.writeFile(dirPath, JSON.stringify(data))
     }
+
+
+module.exports={
+    readFile,
+    writeFile
 }
 

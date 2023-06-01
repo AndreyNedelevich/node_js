@@ -1,13 +1,16 @@
 const express=require('express')
 const UserController=require('./UserController.js')
 
-const router=express.Router()
-const controllerUser= new UserController()
+const controllerUser=new UserController()
+
+const router = express.Router()
 
 
-console.log(controllerUser.getAll());
+console.log(controllerUser.getAll);
 
-
+router.get('/', (req, res)=>{
+    res.send('welcome')
+})
 // router.post('/users', controllerUser.create)
 router.get('/users', controllerUser.getAll)
 // router.get('/users/:id', controllerUser.getOne)
@@ -17,4 +20,4 @@ router.get('/users', controllerUser.getAll)
 
 
 
-module.exports=router;
+module.exports=router
