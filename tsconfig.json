@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                                  /* Указываем какую версию JS удем использовать.. */
+    "module": "commonjs",                                /* Specify what module code is generated. */
+    "moduleResolution": "node",                          /* Указываем что будем компилировать с помощью node */
+    "rootDir": "./src",                                  /* Папка где будут находиться ts файлы */
+    "outDir": "./dist",                                   /* Указываем папку куда компилятор будут компилировать ts файлы  (в этой директории будут находиться скомпелированные js файлы.)*/
+    "allowSyntheticDefaultImports": true,                /* Правила что бы можно было использовать обычный импорт экспорт */
+    "esModuleInterop": true,                             /*Правила что бы можно было использовать обычный импорт экспорт      Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+    "removeComments": true,                             /* Комментарии будут удаленны при компелировании в js  */
+    "noImplicitAny": true,                              /* Означает что бы не использовали any вообще Все параметры должны быть типизированны*/
+    "skipLibCheck": true,                               /* Skip type checking all .d.ts files. Типы которые мы устанавливаем для дополнительных модулей*/
+    "noUnusedLocals": true,                            /* Что бы все переменные которые были созданны были использованны.   */
+  }
+}
