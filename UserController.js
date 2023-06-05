@@ -7,11 +7,11 @@ const serviceBD=require('./file.service.js')
 
 
 module.exports= class UserController {
-    // async create(user) {
-    //     const fileName = fileService.saveFile(picture);
-    //     const createdPost = await Post.create(user);
-    //     return createdPost;
-    // }
+    async create(user) {
+        const fileName = fileService.saveFile(picture);
+        const createdPost = await Post.create(user);
+        return createdPost;
+    }
 
  async getAll(req, res) {
         try {
@@ -23,29 +23,29 @@ module.exports= class UserController {
     }
 
 
-    // async getOne(id) {
-    //     if (!id) {
-    //         throw new Error('не указан ID')
-    //     }
-    //     const post = await Post.findById(id);
-    //     return post;
-    // }
-    //
-    // async update(post) {
-    //     if (!post._id) {
-    //         throw new Error('не указан ID')
-    //     }
-    //     const updatedPost = await Post.findByIdAndUpdate(post._id, post, {new: true})
-    //     return updatedPost;
-    // }
-    //
-    // async delete(id) {
-    //     if (!id) {
-    //         throw new Error('не указан ID')
-    //     }
-    //     const post = await Post.findByIdAndDelete(id);
-    //     return post;
-    // }
+    async getOne(id) {
+        if (!id) {
+            throw new Error('не указан ID')
+        }
+        const post = await Post.findById(id);
+        return post;
+    }
+
+    async update(post) {
+        if (!post._id) {
+            throw new Error('не указан ID')
+        }
+        const updatedPost = await Post.findByIdAndUpdate(post._id, post, {new: true})
+        return updatedPost;
+    }
+
+    async delete(id) {
+        if (!id) {
+            throw new Error('не указан ID')
+        }
+        const post = await Post.findByIdAndDelete(id);
+        return post;
+    }
 }
 
 
