@@ -1,68 +1,100 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const users = [
-    {
-        name: "Oleh",
-        age: 20,
-        gender: "male",
-    },
-    {
-        name: "Anton",
-        age: 10,
-        gender: "male",
-    },
-    {
-        name: "Inokentiy",
-        age: 25,
-        gender: "female",
-    },
-    {
-        name: "Anastasiya",
-        age: 15,
-        gender: "female",
-    },
-    {
-        name: "Cocos",
-        age: 25,
-        gender: "other",
-    },
-];
+const mongoose = __importStar(require("mongoose"));
+const config_1 = require("./configs/config");
+const errors_1 = require("./errors");
+const User_mode_1 = require("./models/User.mode");
+const validators_1 = require("./validators");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-app.get("/users", (req, res) => {
-    res.status(200).json(users);
+app.get("/users", async (req, res) => {
+    try {
+        const users = await User_mode_1.User.find().select("-password");
+        return res.json(users);
+    }
+    catch (e) {
+        console.log(e);
+    }
 });
-app.get("/users/:id", (req, res) => {
-    const { id } = req.params;
-    res.status(200).json(users[+id]);
+app.post("/users", async (req, res, next) => {
+    try {
+        const { error, value } = validators_1.UserValidator.create.validate(req.body);
+        if (error) {
+            throw new errors_1.ApiError(error.message, 400);
+        }
+        const createdUser = await User_mode_1.User.create(value);
+        return res.status(201).json(createdUser);
+    }
+    catch (e) {
+        next(e);
+    }
 });
-app.post("/users", (req, res) => {
-    users.push(req.body);
-    res.status(201).json({
-        message: "User created.",
-    });
+app.get("/users/:id", async (req, res) => {
+    try {
+        const user = await User_mode_1.User.findById(req.params.id);
+        return res.json(user);
+    }
+    catch (e) {
+        console.log(e);
+    }
 });
-app.put("/users/:id", (req, res) => {
-    const { id } = req.params;
-    users[+id] = req.body;
-    res.status(200).json({
-        message: "User updated",
-        data: users[+id],
-    });
+app.put("/users/:id", async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { error, value } = validators_1.UserValidator.update.validate(req.body);
+        if (error) {
+            throw new errors_1.ApiError(error.message, 400);
+        }
+        const updatedUser = await User_mode_1.User.findOneAndUpdate({ _id: id }, { ...value }, { returnDocument: "after" });
+        return res.status(200).json(updatedUser);
+    }
+    catch (e) {
+        next(e);
+    }
 });
-app.delete("/users/:id", (req, res) => {
-    const { id } = req.params;
-    users.splice(+id, 1);
-    res.status(200).json({
-        message: "User deleted",
-    });
+app.delete("/users/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await User_mode_1.User.deleteOne({ _id: id });
+        return res.sendStatus(200);
+    }
+    catch (e) {
+        console.log(e);
+    }
 });
-const PORT = 5001;
-app.listen(PORT, () => {
-    console.log(`Server has started on PORT ${PORT} 🥸`);
+app.use((error, req, res, next) => {
+    const status = error.status || 500;
+    return res.status(status).json(error.message);
+});
+app.listen(config_1.configs.PORT, () => {
+    mongoose.connect(config_1.configs.DB_URL);
+    console.log(`Server has started on PORT ${config_1.configs.PORT} 🥸`);
 });
