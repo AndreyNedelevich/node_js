@@ -14,9 +14,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/users", userRouter);
 
+
+//ОЧЕНЬ ВАЖНО ПОНИМАТЬ ЧТО ВСЕ ОШИБКИ КОТОРЫЕ БУДУТ ВЫЛЕТАТЬ НА СЕРВЕРЕ БУДУТ ОБРАБАТЫВАТЬ И ОТДАВАТЬ ОТВЕТ НА ФРОНТ В
+// ОДНОМ МЕСТЕ В ЭТОМ HENDLERE.(КОД НИЖЕ!!!)
 app.use((err: ApiError, req: Request, res: Response, next: NextFunction) => {
   const status = err.status || 500;
-
+  //Возвращаем при помощи res.status -> статус ошибки  и json -> сообщение ошибки и е статус
   return res.status(status).json({
     message: err.message,
     status: err.status,

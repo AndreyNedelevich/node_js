@@ -6,11 +6,11 @@ import { userService } from "../services/user.service";
 import { IUser } from "../types/user.type";
 import { UserValidator } from "../validators";
 
+//Обезательно необходимо разделять логику. Controler не  должен заниматься какой то логикой или решением какой то
+//задачи и логику обращение и получения информации с базы нужно выносить отдельно в Сервисы и Репозитории.
+//Controller -> вызывает сервис и говорит сервису что ем необходимо выполнить. Кроме вызова сервиса и возврата полученных данных в виде ответа на фронт  в controllere больше не чего не делаем.
+//Также очень важно логику валидации выносить в отдельную папку под названием middlewares. А в сам Controller должны попадать только валидные данные!!!!!!!!!
 
-//Обезательно необходимо разделять логику. Controler не должен заниматься какой то логикой или решением какой то
-//задачи и логику обращение и получения информации с базы нужно выносить отдельно в serrvices.
-//Также очень важно логику валидации выносить в отдельную папку под названием middlewares. А в сам Controller должны
-//попадать только валидные данные.
 class UserController {
   //Создаем метод findAll публичный и ассинхронный который будет делать запрос в БД через Mongoose и в ответ получать
   //всех users. Он принимает как аргумент req(pзапрос), res(при помощи него даем ответ на фронт) и next -
@@ -26,6 +26,8 @@ class UserController {
       return res.json(users);
     } catch (e) {
       next(e);
+      //Если вылетит ошибка мы отлавливаем и передаем в next(e) -> Он в свое очередь возвращает нас назад на уровень ниже и данная ошибка
+      //будет обработана в hendlere в app.ts. **app.use((err: ApiError, req: Request, res: Response, next: NextFunction)  **
     }
   }
 
@@ -36,10 +38,14 @@ class UserController {
   ): Promise<Response<IUser>> {
     try {
       const createdUser = await userService.create(req.res.locals as IUser);
+      //Данные которые прошли валидацию были помещенны в middlware в поле res.locals так как они валидны передаем их в нашу БД.
+      //Обезательно типизируем их как  ***  req.res.locals as IUser  ***
 
       return res.status(201).json(createdUser);
     } catch (e) {
       next(e);
+      //Вызываем next(e) ->  передаем в него ошибку и данная ошибка
+      //будет обработана в hendlere в app.ts. **app.use((err: ApiError, req: Request, res: Response, next: NextFunction)  **
     }
   }
 
