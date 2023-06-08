@@ -9,6 +9,7 @@ import { ApiError } from "./errors";
 import { User } from "./models/User.mode";
 import { IUser } from "./types/user.type";
 import { UserValidator } from "./validators";
+//Импортируем статический класс что бы вызывать его методы для валидации.
 
 const app = express();
 
@@ -49,6 +50,8 @@ app.post(
   ): Promise<Response<IUser>> => {
     try {
       const { error, value } = UserValidator.create.validate(req.body);
+      //Вызываем метод create  от UserValidator и передаем в него через validate то что нам прислал front.
+      //После валидации из данного метода при помощи дестуктиризации возвращаем  error (ошибку если есть), value (данные которые прошли валидацию)
       if (error) {
         throw new ApiError(error.message, 400);
       }
@@ -82,13 +85,18 @@ app.put(
     req: Request,
     res: Response,
     next: NextFunction
+    //обавляем в аргументы next и типизируем NextFunction и в блоке Catch аму error выбрасываем при помощи  next(e);
   ): Promise<Response<IUser>> => {
     try {
       const { id } = req.params;
 
       const { error, value } = UserValidator.update.validate(req.body);
+      //Вызываем метод для валидации и передаем в него то что получаем с фронта и если данные валидны возвращаем их и записываем в базу данных.
       if (error) {
         throw new ApiError(error.message, 400);
+        // Каждый раз кода мы хоим выбросить сообщение используем apiError() и передаем в него message который выдаст валидатор.
+        //В качестве error.message  мы также можем вручную прописать текст ошибки и она в случае ошибки уйдет на фронт.
+        //ПРИМЕР throw new ApiError('Что то пошло не так', 400);
       }
       const updatedUser = await User.findOneAndUpdate(
         { _id: id },
@@ -124,9 +132,17 @@ app.delete(
   }
 );
 
+//Что бы обрабатывать ошибки обращаемся к app используем метод use и в него передаем:
+//!!!Очень важно В основном используеться три параметра (req, res next) но если мы хотим добавить error то она добавляеться только впереди перед тремя аргуметами
+//При возникновении ошибки сама ошибка спустить и обработаеться в даннм handlere.
+
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  //Параметр next типизируем при помощи NextFunction (данную типизацию мы импортировали с express)
   const status = error.status || 500;
+  // status берем с error Но иногода сама ошибка будет не наша. Тосить сюда спустяться все ошибки и даже те которые возникли
+  // сами поэтому используем дефолтный status 500.
   return res.status(status).json(error.message);
+  //ри ошиьки из данного Hendlera будем делать return статусса и текста ошибки.
 });
 
 app.listen(configs.PORT, () => {
