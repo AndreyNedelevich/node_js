@@ -29,70 +29,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongoose = __importStar(require("mongoose"));
 const config_1 = require("./configs/config");
-const errors_1 = require("./errors");
-const User_mode_1 = require("./models/User.mode");
-const validators_1 = require("./validators");
+const user_router_1 = require("./routers/user.router");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-app.get("/users", async (req, res) => {
-    try {
-        const users = await User_mode_1.User.find().select("-password");
-        return res.json(users);
-    }
-    catch (e) {
-        console.log(e);
-    }
-});
-app.post("/users", async (req, res, next) => {
-    try {
-        const { error, value } = validators_1.UserValidator.create.validate(req.body);
-        if (error) {
-            throw new errors_1.ApiError(error.message, 400);
-        }
-        const createdUser = await User_mode_1.User.create(value);
-        return res.status(201).json(createdUser);
-    }
-    catch (e) {
-        next(e);
-    }
-});
-app.get("/users/:id", async (req, res) => {
-    try {
-        const user = await User_mode_1.User.findById(req.params.id);
-        return res.json(user);
-    }
-    catch (e) {
-        console.log(e);
-    }
-});
-app.put("/users/:id", async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const { error, value } = validators_1.UserValidator.update.validate(req.body);
-        if (error) {
-            throw new errors_1.ApiError(error.message, 400);
-        }
-        const updatedUser = await User_mode_1.User.findOneAndUpdate({ _id: id }, { ...value }, { returnDocument: "after" });
-        return res.status(200).json(updatedUser);
-    }
-    catch (e) {
-        next(e);
-    }
-});
-app.delete("/users/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        await User_mode_1.User.deleteOne({ _id: id });
-        return res.sendStatus(200);
-    }
-    catch (e) {
-        console.log(e);
-    }
-});
-app.use((error, req, res, next) => {
-    const status = error.status || 500;
-    return res.status(status).json(error.message);
+app.use("/users", user_router_1.userRouter);
+app.use((err, req, res, next) => {
+    const status = err.status || 500;
+    return res.status(status).json({
+        message: err.message,
+        status: err.status,
+    });
 });
 app.listen(config_1.configs.PORT, () => {
     mongoose.connect(config_1.configs.DB_URL);
