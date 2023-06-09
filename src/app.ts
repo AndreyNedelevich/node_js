@@ -14,7 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/users", userRouter);
 
-
 //ОЧЕНЬ ВАЖНО ПОНИМАТЬ ЧТО ВСЕ ОШИБКИ КОТОРЫЕ БУДУТ ВЫЛЕТАТЬ НА СЕРВЕРЕ БУДУТ ОБРАБАТЫВАТЬ И ОТДАВАТЬ ОТВЕТ НА ФРОНТ В
 // ОДНОМ МЕСТЕ В ЭТОМ HENDLERE.(КОД НИЖЕ!!!)
 app.use((err: ApiError, req: Request, res: Response, next: NextFunction) => {
