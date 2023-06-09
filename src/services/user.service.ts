@@ -11,7 +11,8 @@ class UserService {
   public async findAll(): Promise<IUser[]> {
     try {
       return await User.find().select("-password");
-      //Используем await то бы иметь возможность отловить ошибки. В даннм блоке.
+      //Используем await то бы иметь возможность отловить ошибки. В данном блоке.Такая структура более правильная так как await
+      //ехнически можно ыло и не прописывать.
     } catch (e) {
       throw new ApiError(e.message, e.status);
     }

@@ -5,7 +5,7 @@ import { IUser } from "../types/user.type";
 
 class UserRepository {
   public async create(data: IUser): Promise<IUser> {
-    return User.create(data);
+    return await User.create(data);
   }
   //Пример поиска в базе по email. Одного пользователя.
   // public async findByEmail(email: string): Promise<IUser> {
