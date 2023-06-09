@@ -7,17 +7,17 @@ const user_repository_1 = require("../repositories/user.repository");
 class UserService {
     async findAll() {
         try {
-            return User_mode_1.User.find().select("-password");
+            return await User_mode_1.User.find().select("-password");
         }
         catch (e) {
             throw new errors_1.ApiError(e.message, e.status);
         }
     }
     async create(data) {
-        return user_repository_1.userRepository.create(data);
+        return await user_repository_1.userRepository.create(data);
     }
     async findById(id) {
-        return User_mode_1.User.findById(id);
+        return await User_mode_1.User.findById(id);
     }
 }
 exports.userService = new UserService();

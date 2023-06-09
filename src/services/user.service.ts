@@ -10,9 +10,8 @@ import { IUser } from "../types/user.type";
 class UserService {
   public async findAll(): Promise<IUser[]> {
     try {
-      return User.find().select("-password");
-      //После return мы не указываем await этого делать не желательно так как мы ждем выполнения данного запроса в
-      //файле userController и там у нас есть ** await userService.findAll();**. оэтому если мы пропишем два раза await мы будем ждать два раза.
+      return await User.find().select("-password");
+      //Используем await то бы иметь возможность отловить ошибки. В даннм блоке.
     } catch (e) {
       throw new ApiError(e.message, e.status);
     }
@@ -20,11 +19,11 @@ class UserService {
 
   public async create(data: IUser): Promise<IUser> {
     //Как аргумент данный метод получает User типа IUser и возвращаает Promise
-    return userRepository.create(data);
+    return await userRepository.create(data);
   }
 
   public async findById(id: string): Promise<IUser> {
-    return User.findById(id);
+    return await User.findById(id);
   }
 }
 
