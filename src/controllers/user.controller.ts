@@ -75,7 +75,6 @@ class UserController {
       await userService.deleteById(userId);
 
       return res.sendStatus(204);
-      //При успешном удалении возвращаем  статус 204
     } catch (e) {
       next(e);
     }

@@ -26,7 +26,6 @@ const userSchema = new Schema(
       type: String,
       required: true,
       select: false,
-      //При помщи указания select: false убираем из ответа БД поля  password
     },
   },
   {
