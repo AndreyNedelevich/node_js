@@ -7,11 +7,14 @@ class PasswordService {
     return bcrypt.hash(password, +configs.SECRET_SALT);
   }
 
+  //Метод для сравнения праоля введенного пользователе и хранящимся в хишированным паролям в БД
   public async compare(
     password: string,
     hashedPassword: string
   ): Promise<boolean> {
+    //Как аргумент принимает введенный пароль и пароль хранящийся в БД (захишированный) В результате получим промис с результатом внутри true или false.
     return bcrypt.compare(password, hashedPassword);
+    //true or false
   }
 }
 

@@ -28,6 +28,8 @@ class AuthController {
       const tokensPair = await authService.login(
         req.body,
         req.res.locals?.user
+        // Информация с midleware в котрой будет найден пользователей по email который он ввел при логинации вернеться или пользователь или ошибка
+        //нет такого пользователя.
       );
 
       return res.status(200).json({
