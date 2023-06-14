@@ -12,15 +12,6 @@ class UserController {
             next(e);
         }
     }
-    async create(req, res, next) {
-        try {
-            const createdUser = await user_service_1.userService.create(req.body);
-            return res.status(201).json(createdUser);
-        }
-        catch (e) {
-            next(e);
-        }
-    }
     async findById(req, res, next) {
         try {
             const { userId } = req.params;

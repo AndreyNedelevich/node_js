@@ -1,24 +1,32 @@
 import * as jwt from "jsonwebtoken";
 
-import { ITokensPair } from "../types/token.types";
-
-//Вся логика которая работает с токеннами выносим в отдельный сервис. token.service
+import { configs } from "../configs/config";
+import { ApiError } from "../errors";
+import { ITokenPayload, ITokensPair } from "../types/token.types";
 
 class TokenService {
-  //етод будет создавать пару токеннов.
-  public generateTokenPair(
-    payload: Record<string, string | number>
-    //Record - специальный тип для payload
-  ): ITokensPair {
-    //Из данного метода класса будет возвращаеться пара токенов их типизация находиться в интерфейсе ITokensPair
-    const accessToken = jwt.sign(payload, "jwtAccess", { expiresIn: "15m" });
-    const refreshToken = jwt.sign(payload, "jwtRefresh", { expiresIn: "30d" });
-    //Ту информацию которую мы помещаем в торкен не в коем случае там не должно быть коныиденциальной информации. (Email или пароль)
+  public generateTokenPair(payload: ITokenPayload): ITokensPair {
+    //казываем что наша функция будет возвращать ту инфу которую получит с расшифрованного access токена.
+    const accessToken = jwt.sign(payload, configs.JWT_ACCESS_SECRET, {
+      expiresIn: "30s",
+    });
+    const refreshToken = jwt.sign(payload, configs.JWT_REFRESH_SECRET, {
+      expiresIn: "30d",
+    });
 
     return {
       accessToken,
       refreshToken,
     };
+  }
+
+  //Метод котрый будет принимать токен и проверять его на валидность при помощи секретного ключа.
+  public checkToken(token: string): ITokenPayload {
+    try {
+      return jwt.verify(token, configs.JWT_ACCESS_SECRET) as ITokenPayload;
+    } catch (e) {
+      throw new ApiError("Token not valid", 401);
+    }
   }
 }
 

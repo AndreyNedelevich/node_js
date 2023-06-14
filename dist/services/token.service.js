@@ -22,28 +22,31 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const mongoose = __importStar(require("mongoose"));
-const config_1 = require("./configs/config");
-const auth_router_1 = require("./routers/auth.router");
-const user_router_1 = require("./routers/user.router");
-const app = (0, express_1.default)();
-app.use(express_1.default.json());
-app.use(express_1.default.urlencoded({ extended: true }));
-app.use("/users", user_router_1.userRouter);
-app.use("/auth", auth_router_1.authRouter);
-app.use((err, req, res, next) => {
-    const status = err.status || 500;
-    return res.status(status).json({
-        message: err.message,
-        status: err.status,
-    });
-});
-app.listen(config_1.configs.PORT, () => {
-    mongoose.connect(config_1.configs.DB_URL);
-    console.log(`Server has started on PORT ${config_1.configs.PORT} 🥸`);
-});
+exports.tokenService = void 0;
+const jwt = __importStar(require("jsonwebtoken"));
+const config_1 = require("../configs/config");
+const errors_1 = require("../errors");
+class TokenService {
+    generateTokenPair(payload) {
+        const accessToken = jwt.sign(payload, config_1.configs.JWT_ACCESS_SECRET, {
+            expiresIn: "30s",
+        });
+        const refreshToken = jwt.sign(payload, config_1.configs.JWT_REFRESH_SECRET, {
+            expiresIn: "30d",
+        });
+        return {
+            accessToken,
+            refreshToken,
+        };
+    }
+    checkToken(token) {
+        try {
+            return jwt.verify(token, config_1.configs.JWT_ACCESS_SECRET);
+        }
+        catch (e) {
+            throw new errors_1.ApiError("Token not valid", 401);
+        }
+    }
+}
+exports.tokenService = new TokenService();

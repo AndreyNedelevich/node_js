@@ -30,4 +30,9 @@ export class UserValidator {
     age: this.age,
     gender: this.gender,
   });
+  //Метод для валидации ри валидации.
+  static login = Joi.object({
+    email: this.email.required(),
+    password: this.password.required(),
+  });
 }

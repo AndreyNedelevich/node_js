@@ -27,10 +27,6 @@ class AuthService {
     //2)user тот пользователь который есть в БД в контролере он будет найден в midleware. Передаем его что бы вытянуть тот захишированный пароль
     //который будет найдет в БД по введенному  Email от пользователя.
     try {
-      //TODO: remove, settle inside of the middleware
-      user = await User.findOne({ email: credentials.email });
-      //В данной логике находим в БД user по введенному email (о по правильному данная логика должна быть вынесенна в отдельную Middleware)
-
       const isMatched = await passwordService.compare(
         credentials.password,
         user.password
@@ -45,7 +41,7 @@ class AuthService {
       const tokensPair = await tokenService.generateTokenPair({
         _id: user._id,
       });
-//Сохраняем пару токенов БД презатерая старые если они были в ней. Передаем пару токенов и ID user найденого при логинации по email.
+      //Сохраняем пару токенов БД презатерая старые если они были в ней. Передаем пару токенов и ID user найденого при логинации по email.
       await Token.create({
         ...tokensPair,
         _userId: user._id,
