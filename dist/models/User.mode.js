@@ -26,6 +26,10 @@ const userSchema = new mongoose_1.Schema({
         type: String,
         required: true,
     },
+    isActivated: {
+        type: Boolean,
+        default: false,
+    },
 }, {
     versionKey: false,
     timestamps: true,

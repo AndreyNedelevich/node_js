@@ -18,21 +18,6 @@ class UserController {
     }
   }
 
-  //Коментирую потому что логика перенесенна в egistration.
-  // public async create(
-  //   req: Request,
-  //   res: Response,
-  //   next: NextFunction
-  // ): Promise<Response<IUser>> {
-  //   try {
-  //     const createdUser = await userService.create(req.body);
-  //
-  //     return res.status(201).json(createdUser);
-  //   } catch (e) {
-  //     next(e);
-  //   }
-  // }
-
   public async findById(
     req: Request,
     res: Response,

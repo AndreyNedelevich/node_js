@@ -3,7 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import { authService } from "../services/auth.service";
 import { ITokensPair } from "../types/token.types";
 
-//Контродлер который отвечает за процеа авторизации и логинации.
 class AuthController {
   public async register(
     req: Request,
@@ -25,12 +24,7 @@ class AuthController {
     next: NextFunction
   ): Promise<Response<ITokensPair>> {
     try {
-      const tokensPair = await authService.login(
-        req.body,
-        req.res.locals.user
-        // Информация с midleware в котрой будет найден пользователей по email который он ввел при логинации вернеться или пользователь или ошибка
-        //нет такого пользователя.
-      );
+      const tokensPair = await authService.login(req.body, req.res.locals.user);
 
       return res.status(200).json({
         ...tokensPair,

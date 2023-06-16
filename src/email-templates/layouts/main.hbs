@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body style="color: black; background-color: silver;">
+
+    {{>header}}
+    {{{body}}}
+    {{>footer}}
+
+</body>
+</html>
+
+{{!--  Что бы построить hbs нажимаем ! + tab --}}
+
+{{!--Тут будет находиться основная констпукция в которой поле  {{>header}} и     {{>footer}} будут неизменяемыми  они обозначенны стрелочкой >
+что означает что мы не будем их рендерить а будем только подгружать с папки partials.  Двойеые фигурные скобки будут указывать на файлы в папке partial--}}
+
+{{!--  В  {{{body}}} будет находиться основной контент. Мы можем динамично доставать какую то информацию т оторисовывть ее в body.--}}
+
