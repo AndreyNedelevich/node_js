@@ -16,11 +16,13 @@ class EmailService {
       from: "No reply",
       //Адрее почты который будет указан noReply@gmail.com
       service: "gmail",
+      secure: false,
       auth: {
         user: configs.NO_REPLY_EMAIL,
         pass: configs.NO_REPLY_PASSWORD,
       },
     });
+
     //Создаем переменную hbsOptions в которой будут храниться параметры, опции которые будут передаваться в транспортер
     const hbsOptions = {
       viewEngine: {
@@ -54,6 +56,7 @@ class EmailService {
     this.transporter.use("compile", hbs(hbsOptions));
     //Для того что бы nodemailler взаимодействовыл с hbs необходимо при помощи use передать в тарнспортер что бы он использовал
     //для компиляции hbs и в hbs передать  его настройками.
+    //сам hbs мы получаем с библиотеки odemailer-express-handlebars так как это позволяет подружить nodemeiller и hbs
   }
 
   //Внутри класса создаем метод sendMail который будет отправлять сообщения
@@ -66,6 +69,7 @@ class EmailService {
     //1)email - почту на которую высылаем письмо.
     //2)
     const { templateName, subject } = allTemplates[emailAction];
+    // В зависимости от наименнования ключа которое будет переданно в аргумент emailAction.(WELCOME или  FORGOT_PASSWORD) с данного объекта будет браться информация и передаваться в mailOptions
 
     const mailOptions = {
       to: email,
@@ -73,8 +77,9 @@ class EmailService {
       subject,
       //subject - это условный header нашего email.
       template: templateName,
-      //Указываем название hbs которую хотим отрендерить. 'register'
+      //Указываем название hbs которую хотим отрендерить. 'register' По данному названию будет отрендерина одна из hbs внутри папки views.
       context,
+      //Это контекст с данными котоорые мы можем использовать внутри hbs при помощи такой записи {{name}}
     };
 
     return await this.transporter.sendMail(mailOptions);

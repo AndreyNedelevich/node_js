@@ -26,11 +26,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.tokenService = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const config_1 = require("../configs/config");
+const token_type_enum_1 = require("../enums/token-type.enum");
 const errors_1 = require("../errors");
 class TokenService {
     generateTokenPair(payload) {
         const accessToken = jwt.sign(payload, config_1.configs.JWT_ACCESS_SECRET, {
-            expiresIn: "15s",
+            expiresIn: "200s",
         });
         const refreshToken = jwt.sign(payload, config_1.configs.JWT_REFRESH_SECRET, {
             expiresIn: "30d",
@@ -40,9 +41,18 @@ class TokenService {
             refreshToken,
         };
     }
-    checkToken(token) {
+    checkToken(token, type) {
         try {
-            return jwt.verify(token, config_1.configs.JWT_ACCESS_SECRET);
+            let secret;
+            switch (type) {
+                case token_type_enum_1.ETokenType.Access:
+                    secret = config_1.configs.JWT_ACCESS_SECRET;
+                    break;
+                case token_type_enum_1.ETokenType.Refresh:
+                    secret = config_1.configs.JWT_REFRESH_SECRET;
+                    break;
+            }
+            return jwt.verify(token, secret);
         }
         catch (e) {
             throw new errors_1.ApiError("Token not valid", 401);

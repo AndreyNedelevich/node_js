@@ -35,4 +35,10 @@ export class UserValidator {
     email: this.email.required(),
     password: this.password.required(),
   });
+
+  //Метод для валидации при изменении пароля валидируем старый и новый пароль.
+  static changePassword = Joi.object({
+    oldPassword: this.password.required(),
+    newPassword: this.password.required(),
+  });
 }

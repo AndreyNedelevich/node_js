@@ -10,3 +10,5 @@ export const allTemplates = {
     subject: "WE CONTROL YOUR PASSWORD",
   },
 };
+
+//В зависмоти того значение которое будет подставленно в [] будет возращенна определенная информация.

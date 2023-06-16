@@ -21,7 +21,7 @@ class UserMiddleware {
     isUserExist(field) {
         return async (req, res, next) => {
             try {
-                const user = await User_mode_1.User.findOne({ [field]: req.body[field] });
+                const user = await User_mode_1.User.findOne({ [field]: req.body[field] }).select("password");
                 if (!user) {
                     throw new errors_1.ApiError("User not found", 422);
                 }

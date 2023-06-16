@@ -40,3 +40,7 @@ UserValidator.login = joi_1.default.object({
     email: _a.email.required(),
     password: _a.password.required(),
 });
+UserValidator.changePassword = joi_1.default.object({
+    oldPassword: _a.password.required(),
+    newPassword: _a.password.required(),
+});
