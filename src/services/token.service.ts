@@ -3,12 +3,17 @@ import * as jwt from "jsonwebtoken";
 import { configs } from "../configs/config";
 import { ETokenType } from "../enums/token-type.enum";
 import { ApiError } from "../errors";
-import { ITokenPayload, ITokensPair } from "../types/token.types";
+import {
+  IActionTokenPayload,
+  ITokenAction,
+  ITokenPayload,
+  ITokensPair,
+} from "../types/token.types";
 
 class TokenService {
   public generateTokenPair(payload: ITokenPayload): ITokensPair {
     const accessToken = jwt.sign(payload, configs.JWT_ACCESS_SECRET, {
-      expiresIn: "200s",
+      expiresIn: "20s",
     });
     const refreshToken = jwt.sign(payload, configs.JWT_REFRESH_SECRET, {
       expiresIn: "30d",
@@ -20,13 +25,9 @@ class TokenService {
     };
   }
 
-  public checkToken(token: string, type: ETokenType): ITokenPayload {
-    //Добавляем в аргументы метода checkToken поле type для того что бы в него передвать инфу по котрой будет
-    //в switch определяться по какому секретному ключу расшифровать токен (секретный ключ для access токена или refresh токена.)
-    //В данном примере enum контролируем какие типы могут передаваться в данный аргумент метода.
+  public checkToken<T>(token: string, type: ETokenType): T {
     try {
       let secret: string;
-      //По типу токена будем  подбрасывать разный secret key
       switch (type) {
         case ETokenType.Access:
           secret = configs.JWT_ACCESS_SECRET;
@@ -34,12 +35,25 @@ class TokenService {
         case ETokenType.Refresh:
           secret = configs.JWT_REFRESH_SECRET;
           break;
+        case ETokenType.Activated:
+          secret = configs.JWT_ACTION_TOKEN_SECRET;
+          break;
       }
 
-      return jwt.verify(token, secret) as ITokenPayload;
+      return jwt.verify(token, secret) as T;
     } catch (e) {
       throw new ApiError("Token not valid", 401);
     }
+  }
+
+  public generateActionToken(payload: IActionTokenPayload): ITokenAction {
+    const actionToken = jwt.sign(payload, configs.JWT_ACTION_TOKEN_SECRET, {
+      expiresIn: "500s",
+    });
+
+    return {
+      actionToken,
+    };
   }
 }
 

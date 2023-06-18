@@ -58,10 +58,8 @@ class AuthController {
     try {
       const oldTokenPair = req.res.locals.oldTokenPair as ITokensPair;
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
-      //В две переменные oldTokenPair и tokenPayload (с типизацией через as) получаем старую пару токеннов и ту информацию которая быда вшита в них.
 
       const tokensPair = await authService.refresh(oldTokenPair, tokenPayload);
-      //Вызываем метод refresh от  authService для того что бы создать новую пару токенов и зашить в нее информацию с tokenPayload.
 
       return res.status(200).json(tokensPair);
     } catch (e) {

@@ -21,7 +21,6 @@ router.post(
   userMiddleware.isUserExist<ICredentials>("email"),
   authController.login
 );
-//Ендпоинт для изменения пароля, должно выполняться при валдных токенах поэтому в мидлВаре проверяем это.
 router.post(
   "/changePassword",
   commonMiddleware.isBodyValid(UserValidator.changePassword),

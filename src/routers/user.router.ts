@@ -28,5 +28,6 @@ router.delete(
   authMiddleware.checkAccessToken,
   userController.deleteById
 );
+router.get("/activate/:link", userController.activate);
 
 export const userRouter = router;

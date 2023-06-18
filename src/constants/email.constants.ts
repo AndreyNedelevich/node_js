@@ -3,7 +3,7 @@ import { EEmailActions } from "../enums/email.enum";
 export const allTemplates = {
   [EEmailActions.WELCOME]: {
     templateName: "register",
-    subject: "Welcome to our powerful CRUD platform",
+    subject: "Please click the button to activate your account",
   },
   [EEmailActions.FORGOT_PASSWORD]: {
     templateName: "forgot-password",
@@ -11,4 +11,4 @@ export const allTemplates = {
   },
 };
 
-//В зависмоти того значение которое будет подставленно в [] будет возращенна определенная информация.
+

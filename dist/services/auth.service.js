@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authService = void 0;
+const config_1 = require("../configs/config");
 const email_enum_1 = require("../enums/email.enum");
 const errors_1 = require("../errors");
+const ActionTokenModel_1 = require("../models/ActionTokenModel");
 const OldPassword_modal_1 = require("../models/OldPassword.modal");
 const Token_model_1 = require("../models/Token.model");
 const User_mode_1 = require("../models/User.mode");
@@ -14,9 +16,16 @@ class AuthService {
         try {
             const hashedPassword = await password_service_1.passwordService.hash(data.password);
             await User_mode_1.User.create({ ...data, password: hashedPassword });
+            const actionToken = await token_service_1.tokenService.generateActionToken({
+                email: data.email,
+            });
+            await ActionTokenModel_1.ActionToken.create({
+                ...actionToken,
+                email: data.email,
+            });
             await email_service_1.emailService.sendMail(data.email, email_enum_1.EEmailActions.WELCOME, {
-                name: data.name,
-                url: "http://localhost:5120/activate-account/jwtToken",
+                email: data.email,
+                url: `${config_1.configs.API_URL}/users/activate/${actionToken.actionToken}`,
             });
         }
         catch (e) {

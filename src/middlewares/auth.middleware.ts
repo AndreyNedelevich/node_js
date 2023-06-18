@@ -4,6 +4,7 @@ import { ETokenType } from "../enums/token-type.enum";
 import { ApiError } from "../errors";
 import { Token } from "../models/Token.model";
 import { tokenService } from "../services/token.service";
+import { ITokenPayload } from "../types/token.types";
 
 class AuthMiddleware {
   public async checkAccessToken(
@@ -18,7 +19,10 @@ class AuthMiddleware {
         throw new ApiError("No token", 401);
       }
 
-      const payload = tokenService.checkToken(accessToken, ETokenType.Access);
+      const payload = tokenService.checkToken<ITokenPayload>(
+        accessToken,
+        ETokenType.Access
+      );
 
       const entity = await Token.findOne({ accessToken });
       if (!entity) {
@@ -45,7 +49,10 @@ class AuthMiddleware {
         throw new ApiError("No token", 401);
       }
 
-      const payload = tokenService.checkToken(refreshToken, ETokenType.Refresh);
+      const payload = tokenService.checkToken<ITokenPayload>(
+        refreshToken,
+        ETokenType.Refresh
+      );
 
       const entity = await Token.findOne({ refreshToken });
       //Находим в БД по сущности refreshToken  есть ли у нас такой токен в БД.

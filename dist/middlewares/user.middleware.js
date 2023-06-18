@@ -21,9 +21,14 @@ class UserMiddleware {
     isUserExist(field) {
         return async (req, res, next) => {
             try {
-                const user = await User_mode_1.User.findOne({ [field]: req.body[field] }).select("password");
+                const user = await User_mode_1.User.findOne({ [field]: req.body[field] })
+                    .select("password")
+                    .select("isActivated");
                 if (!user) {
                     throw new errors_1.ApiError("User not found", 422);
+                }
+                if (!user.isActivated) {
+                    throw new errors_1.ApiError("User not activated", 422);
                 }
                 res.locals.user = user;
                 next();

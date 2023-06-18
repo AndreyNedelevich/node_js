@@ -31,7 +31,7 @@ const errors_1 = require("../errors");
 class TokenService {
     generateTokenPair(payload) {
         const accessToken = jwt.sign(payload, config_1.configs.JWT_ACCESS_SECRET, {
-            expiresIn: "200s",
+            expiresIn: "20s",
         });
         const refreshToken = jwt.sign(payload, config_1.configs.JWT_REFRESH_SECRET, {
             expiresIn: "30d",
@@ -51,12 +51,23 @@ class TokenService {
                 case token_type_enum_1.ETokenType.Refresh:
                     secret = config_1.configs.JWT_REFRESH_SECRET;
                     break;
+                case token_type_enum_1.ETokenType.Activated:
+                    secret = config_1.configs.JWT_ACTION_TOKEN_SECRET;
+                    break;
             }
             return jwt.verify(token, secret);
         }
         catch (e) {
             throw new errors_1.ApiError("Token not valid", 401);
         }
+    }
+    generateActionToken(payload) {
+        const actionToken = jwt.sign(payload, config_1.configs.JWT_ACTION_TOKEN_SECRET, {
+            expiresIn: "500s",
+        });
+        return {
+            actionToken,
+        };
     }
 }
 exports.tokenService = new TokenService();
