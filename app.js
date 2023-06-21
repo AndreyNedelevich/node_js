@@ -88,7 +88,7 @@ const path = require('path')
 fs.writeFile(path.join('test','text3.txt'),'hello Okten',(err)=>{
 if(err) throw new Error(err.message)
 })
-//fs.writeFile принимает три  параметра 1) где создать файл  2) ЧТо мы хоти записать в наш файл  3) Это CAllBeck . принимает только ошибку
+//fs.writeFile принимает три  параметра 1) где создать файл  2) ЧТо мы хотим записать в наш файл  3) Это CAllBeck . принимает только ошибку
 
 
 
