@@ -36,9 +36,16 @@ export class UserValidator {
     password: this.password.required(),
   });
 
-  //Метод для валидации при изменении пароля валидируем старый и новый пароль.
   static changePassword = Joi.object({
     oldPassword: this.password.required(),
     newPassword: this.password.required(),
+  });
+
+  static forgotPassword = Joi.object({
+    email: this.email.required(),
+  });
+
+  static setForgotPassword = Joi.object({
+    password: this.password.required(),
   });
 }

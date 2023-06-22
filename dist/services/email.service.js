@@ -37,7 +37,6 @@ class EmailService {
         this.transporter = nodemailer_1.default.createTransport({
             from: "No reply",
             service: "gmail",
-            secure: false,
             auth: {
                 user: config_1.configs.NO_REPLY_EMAIL,
                 pass: config_1.configs.NO_REPLY_PASSWORD,
@@ -57,6 +56,7 @@ class EmailService {
     }
     async sendMail(email, emailAction, context = {}) {
         const { templateName, subject } = email_constants_1.allTemplates[emailAction];
+        context.frontUrl = config_1.configs.FRONT_URL;
         const mailOptions = {
             to: email,
             subject,

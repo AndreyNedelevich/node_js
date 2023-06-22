@@ -44,5 +44,26 @@ class AuthController {
             next(e);
         }
     }
+    async forgotPassword(req, res, next) {
+        try {
+            const { user } = res.locals;
+            await auth_service_1.authService.forgotPassword(user._id, req.body.email);
+            return res.sendStatus(200);
+        }
+        catch (e) {
+            next(e);
+        }
+    }
+    async setForgotPassword(req, res, next) {
+        try {
+            const { password } = req.body;
+            const { jwtPayload } = req.res.locals;
+            await auth_service_1.authService.setForgotPassword(password, jwtPayload._id, req.params.token);
+            return res.sendStatus(200);
+        }
+        catch (e) {
+            next(e);
+        }
+    }
 }
 exports.authController = new AuthController();

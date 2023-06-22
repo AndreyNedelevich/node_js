@@ -5,7 +5,7 @@ const email_enum_1 = require("../enums/email.enum");
 exports.allTemplates = {
     [email_enum_1.EEmailActions.WELCOME]: {
         templateName: "register",
-        subject: "Please click the button to activate your account",
+        subject: "Welcome to our powerful CRUD platform",
     },
     [email_enum_1.EEmailActions.FORGOT_PASSWORD]: {
         templateName: "forgot-password",

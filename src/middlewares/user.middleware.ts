@@ -31,15 +31,12 @@ class UserMiddleware {
       next: NextFunction
     ): Promise<void> => {
       try {
-        const user = await User.findOne({ [field]: req.body[field] })
-          .select("password")
-          .select("isActivated");
+        const user = await User.findOne({ [field]: req.body[field] }).select(
+          "password"
+        );
 
         if (!user) {
           throw new ApiError("User not found", 422);
-        }
-        if (!user.isActivated) {
-          throw new ApiError("User not activated", 422);
         }
 
         res.locals.user = user;

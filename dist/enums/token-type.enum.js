@@ -5,5 +5,4 @@ var ETokenType;
 (function (ETokenType) {
     ETokenType["Refresh"] = "refresh";
     ETokenType["Access"] = "access";
-    ETokenType["Activated"] = "activated";
 })(ETokenType || (exports.ETokenType = ETokenType = {}));

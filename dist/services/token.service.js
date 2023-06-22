@@ -26,12 +26,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.tokenService = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const config_1 = require("../configs/config");
+const action_token_type_enum_1 = require("../enums/action-token-type.enum");
 const token_type_enum_1 = require("../enums/token-type.enum");
 const errors_1 = require("../errors");
 class TokenService {
     generateTokenPair(payload) {
         const accessToken = jwt.sign(payload, config_1.configs.JWT_ACCESS_SECRET, {
-            expiresIn: "20s",
+            expiresIn: "60s",
         });
         const refreshToken = jwt.sign(payload, config_1.configs.JWT_REFRESH_SECRET, {
             expiresIn: "30d",
@@ -51,9 +52,6 @@ class TokenService {
                 case token_type_enum_1.ETokenType.Refresh:
                     secret = config_1.configs.JWT_REFRESH_SECRET;
                     break;
-                case token_type_enum_1.ETokenType.Activated:
-                    secret = config_1.configs.JWT_ACTION_TOKEN_SECRET;
-                    break;
             }
             return jwt.verify(token, secret);
         }
@@ -61,13 +59,39 @@ class TokenService {
             throw new errors_1.ApiError("Token not valid", 401);
         }
     }
-    generateActionToken(payload) {
-        const actionToken = jwt.sign(payload, config_1.configs.JWT_ACTION_TOKEN_SECRET, {
-            expiresIn: "500s",
-        });
-        return {
-            actionToken,
-        };
+    generateActionToken(payload, tokenType) {
+        try {
+            let secret;
+            switch (tokenType) {
+                case action_token_type_enum_1.EActionTokenTypes.Forgot:
+                    secret = config_1.configs.JWT_FORGOT_SECRET;
+                    break;
+                case action_token_type_enum_1.EActionTokenTypes.Activate:
+                    secret = config_1.configs.JWT_ACTIVATE_SECRET;
+                    break;
+            }
+            return jwt.sign(payload, secret, { expiresIn: "7d" });
+        }
+        catch (e) {
+            throw new errors_1.ApiError("Token not valid", 401);
+        }
+    }
+    checkActionToken(token, tokenType) {
+        try {
+            let secret;
+            switch (tokenType) {
+                case action_token_type_enum_1.EActionTokenTypes.Forgot:
+                    secret = config_1.configs.JWT_FORGOT_SECRET;
+                    break;
+                case action_token_type_enum_1.EActionTokenTypes.Activate:
+                    secret = config_1.configs.JWT_ACTIVATE_SECRET;
+                    break;
+            }
+            return jwt.verify(token, secret);
+        }
+        catch (e) {
+            throw new errors_1.ApiError("Token not valid", 401);
+        }
     }
 }
 exports.tokenService = new TokenService();

@@ -1,9 +1,11 @@
 import { Router } from "express";
 
 import { authController } from "../controllers/auth.controller";
+import { EActionTokenTypes } from "../enums/action-token-type.enum";
 import { commonMiddleware, userMiddleware } from "../middlewares";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { ICredentials } from "../types/token.types";
+import { IUser } from "../types/user.type";
 import { UserValidator } from "../validators";
 
 const router = Router();
@@ -21,6 +23,7 @@ router.post(
   userMiddleware.isUserExist<ICredentials>("email"),
   authController.login
 );
+
 router.post(
   "/changePassword",
   commonMiddleware.isBodyValid(UserValidator.changePassword),
@@ -28,12 +31,24 @@ router.post(
   authController.changePassword
 );
 
-//Интпоинт для логики рефреша пары токенов.
 router.post(
   "/refresh",
   authMiddleware.checkRefreshToken,
-  //МидлВара для валидации рефреш токенна.
   authController.refresh
+);
+
+router.post(
+  "/forgot",
+  commonMiddleware.isBodyValid(UserValidator.forgotPassword),
+  userMiddleware.isUserExist<IUser>("email"),
+  authController.forgotPassword
+);
+
+router.put(
+  "/forgot/:token",
+  commonMiddleware.isBodyValid(UserValidator.setForgotPassword),
+  authMiddleware.checkActionToken(EActionTokenTypes.Forgot),
+  authController.setForgotPassword
 );
 
 export const authRouter = router;

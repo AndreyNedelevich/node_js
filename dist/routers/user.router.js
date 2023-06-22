@@ -11,5 +11,4 @@ router.get("/", user_controller_1.userController.findAll);
 router.get("/:userId", middlewares_1.commonMiddleware.isIdValid("userId"), auth_middleware_1.authMiddleware.checkAccessToken, user_controller_1.userController.findById);
 router.put("/:userId", middlewares_1.commonMiddleware.isIdValid("userId"), middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.update), auth_middleware_1.authMiddleware.checkAccessToken, user_controller_1.userController.updateById);
 router.delete("/:userId", middlewares_1.commonMiddleware.isIdValid("userId"), auth_middleware_1.authMiddleware.checkAccessToken, user_controller_1.userController.deleteById);
-router.get("/activate/:link", user_controller_1.userController.activate);
 exports.userRouter = router;

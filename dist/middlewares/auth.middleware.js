@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authMiddleware = void 0;
 const token_type_enum_1 = require("../enums/token-type.enum");
 const errors_1 = require("../errors");
+const Action_model_1 = require("../models/Action.model");
 const Token_model_1 = require("../models/Token.model");
 const token_service_1 = require("../services/token.service");
 class AuthMiddleware {
@@ -42,6 +43,26 @@ class AuthMiddleware {
         catch (e) {
             next(e);
         }
+    }
+    checkActionToken(tokenType) {
+        return async (req, res, next) => {
+            try {
+                const actionToken = req.params.token;
+                if (!actionToken) {
+                    throw new errors_1.ApiError("Token is not provided", 400);
+                }
+                const jwtPayload = token_service_1.tokenService.checkActionToken(actionToken, tokenType);
+                const tokenFromDb = await Action_model_1.Action.findOne({ actionToken });
+                if (!tokenFromDb) {
+                    throw new errors_1.ApiError("Token is invalid", 400);
+                }
+                req.res.locals = { jwtPayload, tokenFromDb };
+                next();
+            }
+            catch (e) {
+                next(e);
+            }
+        };
     }
 }
 exports.authMiddleware = new AuthMiddleware();

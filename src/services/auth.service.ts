@@ -1,8 +1,10 @@
-import { configs } from "../configs/config";
+import { Types } from "mongoose";
+
+import { EActionTokenTypes } from "../enums/action-token-type.enum";
 import { EEmailActions } from "../enums/email.enum";
 import { ApiError } from "../errors";
-import { ActionToken } from "../models/ActionTokenModel";
-import { OldPassword } from "../models/OldPassword.modal";
+import { Action } from "../models/Action.model";
+import { OldPassword } from "../models/OldPassword.model";
 import { Token } from "../models/Token.model";
 import { User } from "../models/User.mode";
 import { ICredentials, ITokenPayload, ITokensPair } from "../types/token.types";
@@ -17,19 +19,9 @@ class AuthService {
       const hashedPassword = await passwordService.hash(data.password);
 
       await User.create({ ...data, password: hashedPassword });
-
-      const actionToken = await tokenService.generateActionToken({
-        email: data.email,
-      });
-
-      await ActionToken.create({
-        ...actionToken,
-        email: data.email,
-      });
-
       await emailService.sendMail(data.email, EEmailActions.WELCOME, {
-        email: data.email,
-        url: `${configs.API_URL}/users/activate/${actionToken.actionToken}`,
+        name: data.name,
+        url: "http://localhost:5541/activate-account/jwtToken",
       });
     } catch (e) {
       throw new ApiError(e.message, e.status);
@@ -67,21 +59,17 @@ class AuthService {
 
   public async refresh(
     oldTokensPair: ITokensPair,
-    //пара старых токенов.
     tokenPayload: ITokenPayload
-    //информ вшитая в токен
   ): Promise<ITokensPair> {
     try {
       const tokensPair = await tokenService.generateTokenPair(tokenPayload);
 
       await Promise.all([
         Token.create({ _userId: tokenPayload._id, ...tokensPair }),
-        //Создаем новый токен в БД будет созраненна новая пара токенов и ID пользователя для которого они будут использоваться.
         Token.deleteOne({ refreshToken: oldTokensPair.refreshToken }),
       ]);
 
       return tokensPair;
-      //Возращаем новую токен пару.
     } catch (e) {
       throw new ApiError(e.message, e.status);
     }
@@ -96,14 +84,11 @@ class AuthService {
       await Promise.all(
         oldPasswords.map(async ({ password: hash }) => {
           const isMatched = await passwordService.compare(
-            dto.newPassword,
+            dto.oldPassword,
             hash
           );
           if (isMatched) {
-            throw new ApiError(
-              "This password was used in your last changes",
-              400
-            );
+            throw new ApiError("Wrong old password", 400);
           }
         })
       );
@@ -114,7 +99,6 @@ class AuthService {
         dto.oldPassword,
         user.password
       );
-
       if (!isMatched) {
         throw new ApiError("Wrong old password", 400);
       }
@@ -123,6 +107,48 @@ class AuthService {
       await Promise.all([
         OldPassword.create({ password: user.password, _userId: userId }),
         User.updateOne({ _id: userId }, { password: newHash }),
+      ]);
+    } catch (e) {
+      throw new ApiError(e.message, e.status);
+    }
+  }
+
+  public async forgotPassword(
+    userId: Types.ObjectId,
+    email: string
+  ): Promise<void> {
+    try {
+      const actionToken = tokenService.generateActionToken(
+        { _id: userId },
+        EActionTokenTypes.Forgot
+      );
+
+      await Promise.all([
+        Action.create({
+          actionToken,
+          tokenType: EActionTokenTypes.Forgot,
+          _userId: userId,
+        }),
+        emailService.sendMail(email, EEmailActions.FORGOT_PASSWORD, {
+          actionToken,
+        }),
+      ]);
+    } catch (e) {
+      throw new ApiError(e.message, e.status);
+    }
+  }
+
+  public async setForgotPassword(
+    password: string,
+    userId: Types.ObjectId,
+    actionToken: string
+  ): Promise<void> {
+    try {
+      const hashedPassword = await passwordService.hash(password);
+
+      await Promise.all([
+        User.updateOne({ _id: userId }, { password: hashedPassword }),
+        Action.deleteOne({ actionToken }),
       ]);
     } catch (e) {
       throw new ApiError(e.message, e.status);

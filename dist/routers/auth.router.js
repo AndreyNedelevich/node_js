@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authRouter = void 0;
 const express_1 = require("express");
 const auth_controller_1 = require("../controllers/auth.controller");
+const action_token_type_enum_1 = require("../enums/action-token-type.enum");
 const middlewares_1 = require("../middlewares");
 const auth_middleware_1 = require("../middlewares/auth.middleware");
 const validators_1 = require("../validators");
@@ -11,4 +12,6 @@ router.post("/register", middlewares_1.commonMiddleware.isBodyValid(validators_1
 router.post("/login", middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.login), middlewares_1.userMiddleware.isUserExist("email"), auth_controller_1.authController.login);
 router.post("/changePassword", middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.changePassword), auth_middleware_1.authMiddleware.checkAccessToken, auth_controller_1.authController.changePassword);
 router.post("/refresh", auth_middleware_1.authMiddleware.checkRefreshToken, auth_controller_1.authController.refresh);
+router.post("/forgot", middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.forgotPassword), middlewares_1.userMiddleware.isUserExist("email"), auth_controller_1.authController.forgotPassword);
+router.put("/forgot/:token", middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.setForgotPassword), auth_middleware_1.authMiddleware.checkActionToken(action_token_type_enum_1.EActionTokenTypes.Forgot), auth_controller_1.authController.setForgotPassword);
 exports.authRouter = router;

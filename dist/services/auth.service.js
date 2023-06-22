@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authService = void 0;
-const config_1 = require("../configs/config");
+const action_token_type_enum_1 = require("../enums/action-token-type.enum");
 const email_enum_1 = require("../enums/email.enum");
 const errors_1 = require("../errors");
-const ActionTokenModel_1 = require("../models/ActionTokenModel");
-const OldPassword_modal_1 = require("../models/OldPassword.modal");
+const Action_model_1 = require("../models/Action.model");
+const OldPassword_model_1 = require("../models/OldPassword.model");
 const Token_model_1 = require("../models/Token.model");
 const User_mode_1 = require("../models/User.mode");
 const email_service_1 = require("./email.service");
@@ -16,16 +16,9 @@ class AuthService {
         try {
             const hashedPassword = await password_service_1.passwordService.hash(data.password);
             await User_mode_1.User.create({ ...data, password: hashedPassword });
-            const actionToken = await token_service_1.tokenService.generateActionToken({
-                email: data.email,
-            });
-            await ActionTokenModel_1.ActionToken.create({
-                ...actionToken,
-                email: data.email,
-            });
             await email_service_1.emailService.sendMail(data.email, email_enum_1.EEmailActions.WELCOME, {
-                email: data.email,
-                url: `${config_1.configs.API_URL}/users/activate/${actionToken.actionToken}`,
+                name: data.name,
+                url: "http://localhost:5541/activate-account/jwtToken",
             });
         }
         catch (e) {
@@ -67,11 +60,11 @@ class AuthService {
     }
     async changePassword(dto, userId) {
         try {
-            const oldPasswords = await OldPassword_modal_1.OldPassword.find({ _userId: userId });
+            const oldPasswords = await OldPassword_model_1.OldPassword.find({ _userId: userId });
             await Promise.all(oldPasswords.map(async ({ password: hash }) => {
-                const isMatched = await password_service_1.passwordService.compare(dto.newPassword, hash);
+                const isMatched = await password_service_1.passwordService.compare(dto.oldPassword, hash);
                 if (isMatched) {
-                    throw new errors_1.ApiError("This password was used in your last changes", 400);
+                    throw new errors_1.ApiError("Wrong old password", 400);
                 }
             }));
             const user = await User_mode_1.User.findById(userId).select("password");
@@ -81,8 +74,38 @@ class AuthService {
             }
             const newHash = await password_service_1.passwordService.hash(dto.newPassword);
             await Promise.all([
-                OldPassword_modal_1.OldPassword.create({ password: user.password, _userId: userId }),
+                OldPassword_model_1.OldPassword.create({ password: user.password, _userId: userId }),
                 User_mode_1.User.updateOne({ _id: userId }, { password: newHash }),
+            ]);
+        }
+        catch (e) {
+            throw new errors_1.ApiError(e.message, e.status);
+        }
+    }
+    async forgotPassword(userId, email) {
+        try {
+            const actionToken = token_service_1.tokenService.generateActionToken({ _id: userId }, action_token_type_enum_1.EActionTokenTypes.Forgot);
+            await Promise.all([
+                Action_model_1.Action.create({
+                    actionToken,
+                    tokenType: action_token_type_enum_1.EActionTokenTypes.Forgot,
+                    _userId: userId,
+                }),
+                email_service_1.emailService.sendMail(email, email_enum_1.EEmailActions.FORGOT_PASSWORD, {
+                    actionToken,
+                }),
+            ]);
+        }
+        catch (e) {
+            throw new errors_1.ApiError(e.message, e.status);
+        }
+    }
+    async setForgotPassword(password, userId, actionToken) {
+        try {
+            const hashedPassword = await password_service_1.passwordService.hash(password);
+            await Promise.all([
+                User_mode_1.User.updateOne({ _id: userId }, { password: hashedPassword }),
+                Action_model_1.Action.deleteOne({ actionToken }),
             ]);
         }
         catch (e) {

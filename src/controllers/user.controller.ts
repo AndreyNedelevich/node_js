@@ -65,17 +65,6 @@ class UserController {
       next(e);
     }
   }
-
-  async activate(req: Request, res: Response, next: NextFunction) {
-    try {
-      const activationLink = req.params.link;
-
-      const updetedUser = await userService.activate(activationLink);
-      return res.status(200).json(updetedUser);
-    } catch (e) {
-      next(e);
-    }
-  }
 }
 
 export const userController = new UserController();

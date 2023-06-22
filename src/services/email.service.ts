@@ -12,9 +12,7 @@ class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
       from: "No reply",
-
       service: "gmail",
-      secure: false,
       auth: {
         user: configs.NO_REPLY_EMAIL,
         pass: configs.NO_REPLY_PASSWORD,
@@ -24,16 +22,13 @@ class EmailService {
     const hbsOptions = {
       viewEngine: {
         extname: ".hbs",
-
         defaultLayout: "main",
-
         layoutsDir: path.join(
           process.cwd(),
           "src",
           "email-templates",
           "layouts"
         ),
-
         partialsDir: path.join(
           process.cwd(),
           "src",
@@ -41,9 +36,7 @@ class EmailService {
           "partials"
         ),
       },
-
       viewPath: path.join(process.cwd(), "src", "email-templates", "views"),
-
       extName: ".hbs",
     };
 
@@ -57,11 +50,11 @@ class EmailService {
   ) {
     const { templateName, subject } = allTemplates[emailAction];
 
+    context.frontUrl = configs.FRONT_URL;
+
     const mailOptions = {
       to: email,
-
       subject,
-
       template: templateName,
       context,
     };
