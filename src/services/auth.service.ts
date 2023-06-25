@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 
 import { EActionTokenTypes } from "../enums/action-token-type.enum";
 import { EEmailActions } from "../enums/email.enum";
+import { EUserStatus } from "../enums/user-status.enum";
 import { ApiError } from "../errors";
 import { Action } from "../models/Action.model";
 import { OldPassword } from "../models/OldPassword.model";
@@ -18,11 +19,37 @@ class AuthService {
     try {
       const hashedPassword = await passwordService.hash(data.password);
 
-      await User.create({ ...data, password: hashedPassword });
-      await emailService.sendMail(data.email, EEmailActions.WELCOME, {
-        name: data.name,
-        url: "http://localhost:5541/activate-account/jwtToken",
-      });
+      const user = await User.create({ ...data, password: hashedPassword });
+
+      const actionToken = tokenService.generateActionToken(
+        { _id: user._id },
+        EActionTokenTypes.Activate
+      );
+      await Promise.all([
+        Action.create({
+          actionToken,
+          tokenType: EActionTokenTypes.Activate,
+          _userId: user._id,
+        }),
+        emailService.sendMail(data.email, EEmailActions.WELCOME, {
+          name: data.name,
+          actionToken,
+        }),
+      ]);
+    } catch (e) {
+      throw new ApiError(e.message, e.status);
+    }
+  }
+
+  public async activate(jwtPayload: ITokenPayload): Promise<void> {
+    try {
+      await Promise.all([
+        User.updateOne({ _id: jwtPayload._id }, { status: EUserStatus.Active }),
+        Action.deleteMany({
+          _userId: jwtPayload._id,
+          tokenType: EActionTokenTypes.Activate,
+        }),
+      ]);
     } catch (e) {
       throw new ApiError(e.message, e.status);
     }
@@ -80,28 +107,33 @@ class AuthService {
     userId: string
   ): Promise<void> {
     try {
-      const oldPasswords = await OldPassword.find({ _userId: userId });
+      const [oldPasswords, user] = await Promise.all([
+        OldPassword.find({ _userId: userId }).lean(),
+        User.findById(userId).select("password"),
+      ]);
+      //В Promise.all в массиве мы делаем ассинхронные запросы в  БД и так как в результате єтих запросов должні вернуться данные
+      //мы используем деструктиризацию и в массив помещаем последовательно переменные в которые будут помещены результаты запросов в каждую БД
+      //oldPasswords -> все старые пароль которые были у пользователя и были замененны на ноые пароли.
+      //user -> текущий пароль пользователя так как мы хотим избежать возможности его повтороной установкой.
+      const passwords = [...oldPasswords, { password: user.password }];
+      //Создаем при помощи spres один массив в которые будут помещенны все пароли включая ставрые и текущий пароль пользователя.
+      // Далее в  Promise.all делаем перебор при помощи map массива всех паролей и на каждом этапе итерации вызываем асинхронный метод
+      // passwordService.compare который сравнивает новый пароль со всеми старыми если будет совпадения значит данный пароль использовался
+      // ранее данным User, и мы получаемошибку.Данный пароль уже использовался ранее. Ведите пароль который не будет совпадать.
       await Promise.all(
-        oldPasswords.map(async ({ password: hash }) => {
+        passwords.map(async ({ password: hash }) => {
           const isMatched = await passwordService.compare(
-            dto.oldPassword,
+            dto.newPassword,
             hash
           );
           if (isMatched) {
-            throw new ApiError("Wrong old password", 400);
+            throw new ApiError(
+              "Данный пароль уже использовался ранее. Ведите пароль который не будет совпадать.",
+              400
+            );
           }
         })
       );
-
-      const user = await User.findById(userId).select("password");
-
-      const isMatched = await passwordService.compare(
-        dto.oldPassword,
-        user.password
-      );
-      if (!isMatched) {
-        throw new ApiError("Wrong old password", 400);
-      }
 
       const newHash = await passwordService.hash(dto.newPassword);
       await Promise.all([
