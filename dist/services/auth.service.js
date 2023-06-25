@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authService = void 0;
 const action_token_type_enum_1 = require("../enums/action-token-type.enum");
 const email_enum_1 = require("../enums/email.enum");
+const user_status_enum_1 = require("../enums/user-status.enum");
 const errors_1 = require("../errors");
 const Action_model_1 = require("../models/Action.model");
 const OldPassword_model_1 = require("../models/OldPassword.model");
@@ -15,11 +16,33 @@ class AuthService {
     async register(data) {
         try {
             const hashedPassword = await password_service_1.passwordService.hash(data.password);
-            await User_mode_1.User.create({ ...data, password: hashedPassword });
-            await email_service_1.emailService.sendMail(data.email, email_enum_1.EEmailActions.WELCOME, {
-                name: data.name,
-                url: "http://localhost:5541/activate-account/jwtToken",
-            });
+            const user = await User_mode_1.User.create({ ...data, password: hashedPassword });
+            const actionToken = token_service_1.tokenService.generateActionToken({ _id: user._id }, action_token_type_enum_1.EActionTokenTypes.Activate);
+            await Promise.all([
+                Action_model_1.Action.create({
+                    actionToken,
+                    tokenType: action_token_type_enum_1.EActionTokenTypes.Activate,
+                    _userId: user._id,
+                }),
+                email_service_1.emailService.sendMail(data.email, email_enum_1.EEmailActions.WELCOME, {
+                    name: data.name,
+                    actionToken,
+                }),
+            ]);
+        }
+        catch (e) {
+            throw new errors_1.ApiError(e.message, e.status);
+        }
+    }
+    async activate(jwtPayload) {
+        try {
+            await Promise.all([
+                User_mode_1.User.updateOne({ _id: jwtPayload._id }, { status: user_status_enum_1.EUserStatus.Active }),
+                Action_model_1.Action.deleteMany({
+                    _userId: jwtPayload._id,
+                    tokenType: action_token_type_enum_1.EActionTokenTypes.Activate,
+                }),
+            ]);
         }
         catch (e) {
             throw new errors_1.ApiError(e.message, e.status);
@@ -60,18 +83,17 @@ class AuthService {
     }
     async changePassword(dto, userId) {
         try {
-            const oldPasswords = await OldPassword_model_1.OldPassword.find({ _userId: userId });
-            await Promise.all(oldPasswords.map(async ({ password: hash }) => {
-                const isMatched = await password_service_1.passwordService.compare(dto.oldPassword, hash);
+            const [oldPasswords, user] = await Promise.all([
+                OldPassword_model_1.OldPassword.find({ _userId: userId }).lean(),
+                User_mode_1.User.findById(userId).select("password"),
+            ]);
+            const passwords = [...oldPasswords, { password: user.password }];
+            await Promise.all(passwords.map(async ({ password: hash }) => {
+                const isMatched = await password_service_1.passwordService.compare(dto.newPassword, hash);
                 if (isMatched) {
-                    throw new errors_1.ApiError("Wrong old password", 400);
+                    throw new errors_1.ApiError("Данный пароль уже использовался ранее. Ведите пароль который не будет совпадать.", 400);
                 }
             }));
-            const user = await User_mode_1.User.findById(userId).select("password");
-            const isMatched = await password_service_1.passwordService.compare(dto.oldPassword, user.password);
-            if (!isMatched) {
-                throw new errors_1.ApiError("Wrong old password", 400);
-            }
             const newHash = await password_service_1.passwordService.hash(dto.newPassword);
             await Promise.all([
                 OldPassword_model_1.OldPassword.create({ password: user.password, _userId: userId }),

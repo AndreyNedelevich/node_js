@@ -12,6 +12,16 @@ class AuthController {
             next(e);
         }
     }
+    async activate(req, res, next) {
+        try {
+            const { jwtPayload } = req.res.locals;
+            await auth_service_1.authService.activate(jwtPayload);
+            return res.sendStatus(201);
+        }
+        catch (e) {
+            next(e);
+        }
+    }
     async login(req, res, next) {
         try {
             const tokensPair = await auth_service_1.authService.login(req.body, req.res.locals.user);

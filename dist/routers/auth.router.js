@@ -9,6 +9,7 @@ const auth_middleware_1 = require("../middlewares/auth.middleware");
 const validators_1 = require("../validators");
 const router = (0, express_1.Router)();
 router.post("/register", middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.create), middlewares_1.userMiddleware.findAndThrow("email"), auth_controller_1.authController.register);
+router.post("/register/:token", auth_middleware_1.authMiddleware.checkActionToken(action_token_type_enum_1.EActionTokenTypes.Activate), auth_controller_1.authController.activate);
 router.post("/login", middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.login), middlewares_1.userMiddleware.isUserExist("email"), auth_controller_1.authController.login);
 router.post("/changePassword", middlewares_1.commonMiddleware.isBodyValid(validators_1.UserValidator.changePassword), auth_middleware_1.authMiddleware.checkAccessToken, auth_controller_1.authController.changePassword);
 router.post("/refresh", auth_middleware_1.authMiddleware.checkRefreshToken, auth_controller_1.authController.refresh);
