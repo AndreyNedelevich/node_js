@@ -11,5 +11,6 @@
     "noImplicitAny": true,                              /* Означает что бы не использовали any вообще Все параметры должны быть типизированны*/
     "skipLibCheck": true,                               /* Skip type checking all .d.ts files. Типы которые мы устанавливаем для дополнительных модулей*/
     "noUnusedLocals": true,                            /* Что бы все переменные которые были созданны были использованны.   */
+    "resolveJsonModule": true
   }
 }
