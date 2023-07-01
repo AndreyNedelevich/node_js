@@ -8,7 +8,6 @@ dayjs.extend(utc);
 
 const oldPasswordsRemover = async () => {
   const previousYear = dayjs().utc().subtract(1, "year");
-  //previousYear будет дата прошлого года.
 
   await OldPassword.deleteMany({
     createdAt: { $lte: previousYear },
@@ -19,4 +18,3 @@ export const removeOldPasswords = new CronJob(
   "0 0 0 * * *",
   oldPasswordsRemover
 );
-//"0 0 0 * * *",  -> делаем так что бы он отрабатывал один раз в сутки.
