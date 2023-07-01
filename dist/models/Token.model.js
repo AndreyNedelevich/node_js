@@ -17,5 +17,5 @@ const tokensSchema = new mongoose_1.Schema({
         required: true,
         ref: User_mode_1.User,
     },
-});
+}, { versionKey: false, timestamps: true });
 exports.Token = (0, mongoose_1.model)("token", tokensSchema);

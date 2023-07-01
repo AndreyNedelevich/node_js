@@ -91,7 +91,7 @@ class AuthService {
             await Promise.all(passwords.map(async ({ password: hash }) => {
                 const isMatched = await password_service_1.passwordService.compare(dto.newPassword, hash);
                 if (isMatched) {
-                    throw new errors_1.ApiError("Данный пароль уже использовался ранее. Ведите пароль который не будет совпадать.", 400);
+                    throw new errors_1.ApiError("Wrong old password", 400);
                 }
             }));
             const newHash = await password_service_1.passwordService.hash(dto.newPassword);

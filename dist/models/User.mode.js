@@ -33,9 +33,9 @@ const userSchema = new mongoose_1.Schema({
         required: true,
         select: false,
     },
-    isActivated: {
-        type: Boolean,
-        default: false,
+    avatar: {
+        type: String,
+        required: false,
     },
 }, {
     versionKey: false,

@@ -42,20 +42,27 @@ class UserService {
   ): Promise<IUser> {
     const user = await this.getOneByIdOrThrow(userId);
     //Находим user в БД по id используя внутрений  метод getOneByIdOrThrow он вернет екземпляр класса user
-
     if (user.avatar) {
-      //Если фото у пользователя уже установленно то просто делаем его заменну.
+      //Если фото у пользователя уже установленно то просто делаем его заменну. Удаляя предидущий c Bucket.
       await s3Service.deleteFile(user.avatar);
     }
     const pathToFile = await s3Service.uploadFile(avatar, "user", userId);
+    //Запускаем s3Service.uploadFile передаем в него: 1)файл, 2)категорию по которой мы внутри бакета хотим разделить фото по папкам для удобства (внутри user
+    // могут быть другие папки), 3)ID User  кто загрузил avatar.
+    //В pathToFile  -> это будет путь к файлу.
+
     return await User.findByIdAndUpdate(
+      //Получив путь с сервисса далее просто сохраняем его для нашего user в поле avatar
       userId,
       { $set: { avatar: pathToFile } },
+      //Если необходимо только изменить одно поле используем set, если его не тспользовать то будет переписан весь объект.
       { new: true }
+      //Третий параметр даст возможность вернуть актуальные данные.
     );
   }
 
   public async deleteAvatar(userId: string): Promise<IUser> {
+    //Метод который будет удалять фото пользователя с бакета по  ID пользователя.
     const user = await this.getOneByIdOrThrow(userId);
 
     if (!user.avatar) {

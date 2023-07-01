@@ -86,7 +86,7 @@ class UserController {
       //Достаем iD пользователя
       const avatar = req.files.avatar as UploadedFile;
       //Достаем файл с req.files. Типизируем его при помощи UploadedFile. Указывая что это будет только один файл.
-
+      console.log(avatar);
 
       const user = await userService.uploadAvatar(userId, avatar);
       //Сервис будет принимать userId  и  avatar
@@ -109,6 +109,7 @@ class UserController {
       const user = await userService.deleteAvatar(userId);
 
       const response = userMapper.toResponse(user);
+      //Вызываем метод toResponse и передаем в него данные Данный метод вернет нам обработанные поля user (avatar) для фронта.
       return res.status(201).json(response);
       //Возвращаем в response статус и  данные о самом user
     } catch (e) {
