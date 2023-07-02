@@ -23,6 +23,7 @@ router.put(
   authMiddleware.checkAccessToken,
   userController.updateById
 );
+
 router.delete(
   "/:userId",
   commonMiddleware.isIdValid("userId"),

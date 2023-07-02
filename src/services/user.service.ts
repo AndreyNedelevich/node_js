@@ -64,8 +64,10 @@ class UserService {
   public async deleteAvatar(userId: string): Promise<IUser> {
     //Метод который будет удалять фото пользователя с бакета по  ID пользователя.
     const user = await this.getOneByIdOrThrow(userId);
+    //Находит user по id.
 
     if (!user.avatar) {
+      //User не имеет avatar просто возвращаем user. Если у него есть avatar и функция была вызвана тоидем в сервис s3Service.deleteFile(user.avatar);
       return user;
     }
 
@@ -74,7 +76,10 @@ class UserService {
     return await User.findByIdAndUpdate(
       userId,
       { $unset: { avatar: true } },
+      //Используем если нам необходимо удалить только значения с одного поля.А не обновлять весь объект. Делать противоположное действия
+      // чем  $set
       { new: true }
+      // ЧТо бы были возвращенны данные уже обновленные. Если не поставитьданные вернуться до обновления.
     );
   }
 

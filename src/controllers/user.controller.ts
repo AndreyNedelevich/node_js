@@ -36,6 +36,7 @@ class UserController {
       const user = await userService.findById(userId);
 
       const response = userMapper.toResponse(user);
+      //Используем с class userMapper метод toResponse которые вернет поля пользователя но поле avatar, если будет отстутсвовать фото присвоит null.
       return res.json(response);
     } catch (e) {
       next(e);
@@ -53,6 +54,9 @@ class UserController {
       const updatedUser = await userService.updateById(userId, req.body);
 
       const response = userMapper.toResponse(updatedUser);
+      //Используем с class userMapper метод toResponse которые вернет поля пользователя но поле avatar, если будет отстутсвовать фото присвоит null.
+      // или сформирует полный путь url на аvatar добавив в путь строку  **https://express-node.s3.amazonaws.com**
+
       return res.status(200).json(response);
     } catch (e) {
       next(e);
@@ -109,9 +113,10 @@ class UserController {
       const user = await userService.deleteAvatar(userId);
 
       const response = userMapper.toResponse(user);
-      //Вызываем метод toResponse и передаем в него данные Данный метод вернет нам обработанные поля user (avatar) для фронта.
+      //Вызываем метод toResponse и передаем в него данные User. Данный метод вернет нам обработанные поля user (avatar) для фронта.
+      // или сформирует полный путь url на аvatar добавив в путь строку  **https://express-node.s3.amazonaws.com**
       return res.status(201).json(response);
-      //Возвращаем в response статус и  данные о самом user
+      //Возвращаем в response статус и  данные о самом user (бработанные в userMapper.toResponse)
     } catch (e) {
       next(e);
     }
