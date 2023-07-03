@@ -51,6 +51,7 @@ router.delete(
   userController.deleteAvatar
 );
 
+//Роутер для загрузки видео.
 router.post(
   "/:userId/video",
   authMiddleware.checkAccessToken,

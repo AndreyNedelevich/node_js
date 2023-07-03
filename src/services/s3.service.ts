@@ -1,6 +1,7 @@
 import path from "node:path";
 
-//Импортируем необходимые методы для работы с клиентом для client-s3
+//Импортируем необходимые методы-команды для работы с клиентом для client-s3. Здесь доступны те методы на еоторые мы давали
+//разрешение во время создания бакетта.На те что дали разрешение т можем использовать.
 import {
   DeleteObjectCommand,
   PutObjectCommand,
@@ -72,6 +73,7 @@ class S3Service {
 
   public async uploadFileStream(
     stream: Readable,
+    //типизируем при помощи Readable,
     itemType: string,
     itemId: string,
     file: UploadedFile
@@ -81,14 +83,19 @@ class S3Service {
 
     await this.client.send(
       new PutObjectCommand({
+        //Для переправления загружаемого видео в сервис C3 используем команду PutObjectCommand.
         Bucket: configs.AWS_S3_NAME,
         Key: filePath,
         Body: stream,
+        //Сам стрим
         ACL: configs.AWS_S3_ACL,
         ContentType: file.mimetype,
+        //Ттп загружаемого файлв.
         ContentLength: file.size,
+        //Указываем размер файл.
       })
     );
+    //Метод возвращает ПРОМИС.
   }
 
   //Метод который будет строить путь для каждого файла.

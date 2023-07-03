@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { UploadedFile } from "express-fileupload";
 //Импоритруем UploadedFile для типизации получаемого файла.
 import multer from "multer";
+//Метод createReadStream который позволяет сделать Stream.
 import { createReadStream } from "streamifier";
 
 import { ApiError } from "../errors";
@@ -130,22 +131,38 @@ class UserController {
     try {
       const { userId } = req.params;
       const upload = multer().single("");
+      //Мы используем multer с библиотеки "multer" ток как  fileupload (app.use(fileUpload());)  не позвляет делать стримы.
+      //В методе single необходимо указать филду тот ключ который мы будем использовать во время загрузки. Его мы даем в названии файла.
+      // Так как мы ключ указывали в fileUpload то здесь мы его не указываем. Также можно загружать и несколькоф файлов используя другие методы.
+      //Сам Multer работает как middleware. Занимаеться загрузкой файлов.
 
       upload(req, res, async (err) => {
+        //Внутри upload полученого с метода multer().single организовуем логику и он постепенно будет загружать видео файл. Метод асинхронный.
+        //И главная идея стрима не держать файл в опереивной памяти.
         if (err) {
           throw new ApiError("Download error", 500);
+          //По принципу midddleware если произойдет ошибка выбросим ее.
         }
         const video = req.files.video as UploadedFile;
+        //Получаем бафер видео файла с котрого создаем стримы.
 
         const stream = createReadStream(video.data);
+        //С помощью метода createReadStream  c библиотеки  streamifier  будем создавать stream
 
         const pathToVideo = await s3Service.uploadFileStream(
+          //Вызываем метод uploadFileStream с С3 класса  передаем в него. При помощи него сам стрим будет перенаправлен в баакет и сохранен там.
           stream,
+          //Сам стрим загрузки.
           "user",
+          //Тип он же и папка для сохранения внутри бакета.
           userId,
+          //ID пользователя
           video
+          //Само видео которое достали с запроса.
         );
+
         return res.status(201).json(pathToVideo);
+        //Возвращаем путь к видео.
       });
     } catch (e) {
       next(e);
