@@ -24,12 +24,14 @@ UserValidator.email = joi_1.default.string()
     "string.email": "Адрес электронной почты имеет неверный формат",
 });
 UserValidator.password = joi_1.default.string().regex(constants_1.regexConstants.PASSWORD).trim();
+UserValidator.phone = joi_1.default.string().regex(constants_1.regexConstants.PHONE).trim();
 UserValidator.create = joi_1.default.object({
     name: _a.firstName.required(),
     age: _a.age.required(),
     gender: _a.gender.required(),
     email: _a.email.required(),
     password: _a.password.required(),
+    phone: _a.phone.required(),
 });
 UserValidator.update = joi_1.default.object({
     name: _a.firstName,

@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 
 import { EActionTokenTypes } from "../enums/action-token-type.enum";
 import { EEmailActions } from "../enums/email.enum";
+import { ESmsActions } from "../enums/sms.enums";
 import { EUserStatus } from "../enums/user-status.enum";
 import { ApiError } from "../errors";
 import { Action } from "../models/Action.model";
@@ -12,6 +13,7 @@ import { ICredentials, ITokenPayload, ITokensPair } from "../types/token.types";
 import { IUser } from "../types/user.type";
 import { emailService } from "./email.service";
 import { passwordService } from "./password.service";
+import { smsService } from "./sms.service";
 import { tokenService } from "./token.service";
 
 class AuthService {
@@ -35,6 +37,9 @@ class AuthService {
           name: data.name,
           actionToken,
         }),
+        smsService.sendSms(data.phone, ESmsActions.WELCOME),
+        //Используем екземпляр smsService класса new Twilio с настройками и метод  от данного екземпляра.В параметры передаем
+        //data.phone - телефон c БД (но так как сервис бесплатный то смс можем отправлять только на 1 номер) и текст CMC
       ]);
     } catch (e) {
       throw new ApiError(e.message, e.status);
